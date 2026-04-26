@@ -413,6 +413,31 @@ def test_handle_device_bound():
     assert protocol.key == "fake-key"
 
 
+@pytest.mark.parametrize(
+    "response_type,response_data,expected_state",
+    [
+        ("DAT", {"cols": ["key"], "dat": ["value"]}, {"key": "value"}),
+        ("ReS", {"opt": ["key"], "val": ["value"]}, {"key": "value"}),
+    ],
+)
+def test_packet_received_accepts_case_insensitive_response_type(
+    response_type, response_data, expected_state
+):
+    # Arrange
+    protocol = DeviceProtocol2Test()
+
+    # Act
+    protocol.packet_received({
+        'pack': {
+            't': response_type,
+            **response_data,
+        }
+    }, ("0.0.0.0", 0))
+
+    # Assert
+    assert protocol.state == expected_state
+
+
 def test_handle_unknown_packet():
     # Arrange
     protocol = DeviceProtocol2Test()
